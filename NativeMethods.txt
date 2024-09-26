@@ -1,0 +1,7 @@
+FindWindow
+FindWindowExW
+SetParent
+SendMessageTimeoutW
+PostMessageW
+WM_WINDOWPOSCHANGING
+WINDOWPOS
