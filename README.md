@@ -37,14 +37,16 @@ The message doesn't return a `HWND` and we don't own the parent process, so it t
 All of this is, admittedly, a very awkward hack. Besides the obvious concern that we've parented a window to a separate process, and that we're depending on hidden undocumented APIs, there are some minor annoyances.
 The window behind desktop icons is blocked from receiving input events (this could be solved by sending input messages to our window directly) and the parent window does not seem to invalidate itself automatically.
 
-After sequentially probing combinations of wParam and lParam values for message `0x052C` on Windows 10 and crashing Progman a bunch in the process, there seem to be options to the command.
+After sequentially probing combinations of `wParam` and `lParam` values for message `0x052C` on Windows 10 and crashing Progman a bunch in the process, there seem to be options to the command.
 
-`wParam` - appears to be some sort of bit flag
-`0x0` to `0x4` - are valid, create WorkerW
-`0x5`, `0x6`, `0x8`, `0x9`, `0xA`, `0xC` - crash Progman
-`0x6`, `0xF` and higher - return an error
-`0x7`, `0xB` - cause a broadcast of a registered message `ForwardMessage`, likely another part of undocumented functionality
-`0xD` - if lParam = 0, causes WM_PAINT to be sent to WorkerW, which is then ignored; if lParam > 0, causes WorkerW to immediately repaint
+`wParam` - appears to be some kind of bit flag
+|wParam| |
+|-|-|
+|`0x0` to `0x4`|are valid, create WorkerW|
+|`0x5`, `0x6`, `0x8`, `0x9`, `0xA`, `0xC`|crash Progman|
+|`0x6`, `0xF` and higher|fail with an error|
+|`0x7`, `0xB`|cause a broadcast of a registered message `ForwardMessage`, likely another part of undocumented functionality|
+|`0xD`|if lParam = 0, causes WM_PAINT to be sent to WorkerW, which is then ignored; if lParam > 0, causes WorkerW to immediately repaint|
 
 Short of doing proper reverse-engineering, this seems a useful enough find. Sending `msg=0x052C, wParam=0xD, lParam=1` can be used to repaint the WorkerW window and clean up after ourselves.
 
